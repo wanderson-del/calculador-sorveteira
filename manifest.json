@@ -1,6 +1,7 @@
 {
   "name": "Maquininha Sorveteira",
-  "short_name": "Sorveteira",
+  "short_name": "Sorvete",
+  "description": "Calculadora de vendas e troco para sorveteira de praia",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#000000",
