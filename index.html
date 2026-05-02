@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Maquininha Sorveteira</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- PWA / ÍCONES -->
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
+<style>
+body {
+  font-family: Arial;
+  margin:0;
+  background:#000;
+  color:#0f0;
+}
+
+.container {
+  max-width:400px;
+  margin:auto;
+  padding:10px;
+}
+
+button, select, input {
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  margin:5px 0;
+  border-radius:10px;
+  border:none;
+}
+
+button {
+  background:#00c853;
+  color:#000;
+  font-weight:bold;
+}
+
+.topo {
+  display:flex;
+  gap:5px;
+}
+
+.topo button {
+  flex:1;
+}
+
+.total-box {
+  background:#000;
+  color:#0f0;
+  font-size:28px;
+  text-align:center;
+  padding:10px;
+  border:2px solid #0f0;
+}
+
+.resultado {
+  font-size:22px;
+  text-align:center;
+  margin-top:10px;
+}
+
+.notas {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px;
+}
+
+.card {
+  background:#111;
+  border:2px solid #0f0;
+  color:#0f0;
+  padding:10px;
+  border-radius:8px;
+  font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>🍦 Maquininha</h2>
+
+<select id="preco">
+  <option value="15">R$15</option>
+  <option value="20">R$20</option>
+  <option value="25">R$25</option>
+</select>
+
+<div class="topo">
+  <button onclick="addQtd()">+1 🍦</button>
+  <button onclick="resetar()">Limpar</button>
+</div>
+
+<input type="number" id="quantidade" value="1" min="1">
+
+<div class="topo">
+  <button onclick="setPago(20)">20</button>
+  <button onclick="setPago(50)">50</button>
+  <button onclick="setPago(100)">100</button>
+</div>
+
+<input type="number" id="pago" placeholder="Valor pago">
+
+<button onclick="calcular()">Finalizar Venda</button>
+
+<div class="total-box" id="total">R$ 0,00</div>
+<div class="resultado" id="resultado"></div>
+<div class="notas" id="notas"></div>
+
+</div>
+
+<script>
+function atualizarTotal(){
+  const preco = parseFloat(document.getElementById('preco').value);
+  const qtd = parseInt(document.getElementById('quantidade').value);
+
+  if(!isNaN(preco) && !isNaN(qtd)){
+    document.getElementById('total').innerText =
+      'R$ ' + (preco*qtd).toFixed(2);
+  }
+}
+
+function addQtd(){
+  let q = document.getElementById('quantidade');
+  q.value = parseInt(q.value || 0) + 1;
+  atualizarTotal();
+}
+
+function resetar(){
+  document.getElementById('quantidade').value = 1;
+  document.getElementById('pago').value = '';
+  document.getElementById('resultado').innerText = '';
+  document.getElementById('notas').innerHTML = '';
+  atualizarTotal();
+}
+
+function setPago(valor){
+  document.getElementById('pago').value = valor;
+}
+
+function calcularTroco(valor){
+  let restante = Math.round(valor * 100);
+
+  const dinheiro = [
+    10000, 5000, 2000, 1000, 500, 200,
+    100, 50, 25, 10, 5
+  ];
+
+  let resultado = [];
+
+  dinheiro.forEach(v => {
+    let qtd = Math.floor(restante / v);
+    if(qtd > 0){
+      resultado.push({valor: v, quantidade: qtd});
+      restante %= v;
+    }
+  });
+
+  return resultado;
+}
+
+function formatar(valor){
+  return valor >= 100
+    ? 'R$ ' + (valor / 100)
+    : (valor / 100).toFixed(2);
+}
+
+function calcular(){
+  const preco = parseFloat(document.getElementById('preco').value);
+  const qtd = parseInt(document.getElementById('quantidade').value);
+  const pago = parseFloat(document.getElementById('pago').value);
+
+  const total = preco * qtd;
+  atualizarTotal();
+
+  if(isNaN(pago)){
+    document.getElementById('resultado').innerText = 'Digite o valor pago';
+    return;
+  }
+
+  const troco = pago - total;
+  const notasDiv = document.getElementById('notas');
+  notasDiv.innerHTML = '';
+
+  if(troco < 0){
+    document.getElementById('resultado').innerText =
+      'Falta R$ ' + Math.abs(troco).toFixed(2);
+    return;
+  }
+
+  document.getElementById('resultado').innerText =
+    'Troco: R$ ' + troco.toFixed(2);
+
+  const itens = calcularTroco(troco);
+
+  itens.forEach(item => {
+    for(let i = 0; i < item.quantidade; i++){
+      let el = document.createElement('div');
+      el.className = 'card';
+      el.innerText = formatar(item.valor);
+      notasDiv.appendChild(el);
+    }
+  });
+}
+
+window.onload = atualizarTotal;
+</script>
+
+</body>
+</html>
